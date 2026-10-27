@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My App</title>
+</head>
+<body style="text-align: center;">
+    <h1>University Course Attendance App</h1>
+    <p>This is a simple app that handles data regarding university students, instructors, courses, lectures, and attendance. This app is built with Django.</p>
+
+    {% if user.is_authenticated %}
+        <p><b>{{ user.username }}</b></p>
+    {% else %}
+        <p><b>Not logged in.</b></p>
+    {% endif %}
+
+    <p>{{ current_time }}</p>
+</body>
+</html>

@@ -5,15 +5,41 @@ from decimal import Decimal, InvalidOperation
 from zoneinfo import ZoneInfo
 
 from django.http import HttpRequest, HttpResponse
+from django.shortcuts import render
 
 CDT = ZoneInfo("America/Chicago")
 
 
-def time_view(request: HttpRequest) -> HttpResponse:
+def time_view(request):
     """Return current Chicago time as HH:MM (24-hour), plain text."""
     now = datetime.now(tz=CDT)
     return HttpResponse(now.strftime("%H:%M"), content_type="text/plain")
 
+@require_POST
+def createUser(request):
+    email = request.POST.get('email')
+    user_name = request.POST.get('user_name')
+    password = request.POST.get('password')
+    is_student = request.POST.get('is_student') == 'true'
+    if User.objects.filter(email=email).exists():
+        return HttpResponseBadRequest("Email is already in use--login or use another one.")
+    user = User.objects.create_user(username=user_name, email=email, password=password)
+    if is_student:
+        Student.objects.create(user=user)
+    else:
+        Instructor.objects.create(user=user)
+    login(request, user)
+    return HttpResponse("User created", status=200)
+
+def index(request):
+    current_time = datetime.now(ZoneInfo("America/Chicago")).strftime("%H:%M")
+    return render(request, "index.html", {"current_time": current_time})
+
+from django.views.decorators.http import require_GET
+
+@require_GET
+def new_user_form(request):
+    return render(request, "signup.html")
 
 def _decimal_to_str(x: Decimal) -> str:
     """Format Decimal without scientific notation and without trailing zeros."""
