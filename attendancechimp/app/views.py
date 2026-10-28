@@ -6,6 +6,13 @@ from zoneinfo import ZoneInfo
 
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
+from django.contrib.auth import login
+from django.contrib.auth.models import User
+from django.http import HttpResponse, HttpResponseBadRequest
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from .models import Student, Instructor
+
 
 CDT = ZoneInfo("America/Chicago")
 
@@ -15,12 +22,13 @@ def time_view(request):
     now = datetime.now(tz=CDT)
     return HttpResponse(now.strftime("%H:%M"), content_type="text/plain")
 
+@csrf_exempt
 @require_POST
 def createUser(request):
     email = request.POST.get('email')
     user_name = request.POST.get('user_name')
     password = request.POST.get('password')
-    is_student = request.POST.get('is_student') == 'true'
+    is_student = request.POST.get('is_student') in ('1', 'true')
     if User.objects.filter(email=email).exists():
         return HttpResponseBadRequest("Email is already in use--login or use another one.")
     user = User.objects.create_user(username=user_name, email=email, password=password)
