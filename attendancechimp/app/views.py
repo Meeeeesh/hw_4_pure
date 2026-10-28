@@ -11,7 +11,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from .models import Student, Instructor
+from .models import StudentProfile, InstructorProfile
 
 
 CDT = ZoneInfo("America/Chicago")
@@ -33,9 +33,9 @@ def createUser(request):
         return HttpResponseBadRequest("Email is already in use--login or use another one.")
     user = User.objects.create_user(username=user_name, email=email, password=password)
     if is_student:
-        Student.objects.create(user=user)
+        StudentProfile.objects.create(user=user)
     else:
-        Instructor.objects.create(user=user)
+        InstructorProfile.objects.create(user=user)
     login(request, user)
     return HttpResponse("User created", status=200)
 
