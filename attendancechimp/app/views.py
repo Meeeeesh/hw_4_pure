@@ -41,13 +41,13 @@ def createUser(request):
 
 def index(request):
     current_time = datetime.now(ZoneInfo("America/Chicago")).strftime("%H:%M")
-    return render(request, "index.html", {"current_time": current_time})
+    return render(request, "app/index.html", {"current_time": current_time})
 
 from django.views.decorators.http import require_GET
 
 @require_GET
 def new_user_form(request):
-    return render(request, "signup.html")
+    return render(request, "app/new.html")
 
 def _decimal_to_str(x: Decimal) -> str:
     """Format Decimal without scientific notation and without trailing zeros."""
