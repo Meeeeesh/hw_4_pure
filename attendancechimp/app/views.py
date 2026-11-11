@@ -97,9 +97,7 @@ def new_qr_upload(request):
 
 @csrf_exempt
 def createCourse(request):
-    """Create a Course from POSTed course-name, start-time, end-time and day-* fields.
-
-    Instructors only (401 otherwise). Bad or duplicate data gets 400, not a crash.
+    """Create a Course from POST.
     """
     if not request.user.is_authenticated or not is_instructor(request.user):
         return HttpResponse("Unauthorized", status=401)
@@ -132,7 +130,7 @@ def createCourse(request):
 
 @csrf_exempt
 def createLecture(request):
-    """Create a Lecture for the course named in the POST's choice field. Instructors only.
+    """Create a Lecture for the course for instructors only.
     """
     if not request.user.is_authenticated or not is_instructor(request.user):
         return HttpResponse("Unauthorized", status=401)
@@ -148,7 +146,7 @@ def createLecture(request):
 
 @csrf_exempt
 def createQRCodeUpload(request):
-    """Save the POSTed imageUpload file as a QRCodeUpload for the logged-in student. Students only. The upload time is set automatically.
+    """Save the POST for students only.
     """
     if not request.user.is_authenticated or not is_student(request.user):
         return HttpResponse("Unauthorized", status=401)
@@ -161,7 +159,7 @@ def createQRCodeUpload(request):
 
 
 def dumpUploads(request):
-    """Return every QR code upload as JSON: [{"username": ..., "upload_time": ...}]. Instructors only.
+    """Return every QR code upload as JSON data
     """
     if not request.user.is_authenticated or not is_instructor(request.user):
         return HttpResponse("Unauthorized", status=401)
