@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from .models import StudentProfile, InstructorProfile
+from .models import StudentProfile, InstructorProfile, getUploadsForCourse
 from django.core.exceptions import ValidationError
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -170,5 +170,23 @@ def dumpUploads(request):
             "upload_time": timezone.localtime(upload.uploaded_at).strftime("%Y-%m-%d %H:%M:%S"),
         }
         for upload in QRCodeUpload.objects.all()
+    ]
+    return JsonResponse(data, safe=False)
+
+def getUploads(request):
+    """Return qr code uploads as JSON for each student's username, or return errors.
+    """
+    if not is_instructor(request.user):
+        return HttpResponse("Unauthorized", status=401)
+
+    course = request.GET.get("course")
+    if not course:
+        return JsonResponse({"error": "Missing course parameter"}, status=400)
+
+    data = [
+        {"username": upload.student.username,
+         "upload_time": timezone.localtime(upload.uploaded_at).strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        for upload in getUploadsForCourse(course)
     ]
     return JsonResponse(data, safe=False)

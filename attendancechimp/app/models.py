@@ -21,6 +21,8 @@ from django.contrib.auth.models import User
 import logging
 import string
 import random
+from datetime import datetime
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -139,3 +141,30 @@ def is_student(user):
     """Return True if the user has a StudentProfile."""
     return hasattr(user, 'student_profile')
 
+
+def _to_time(value):
+    """Makes a datetime time from a string and returns it!"""
+    if isinstance(value, str):
+        return datetime.strptime(value, "%H:%M").time()
+    return value
+
+def getUploadsForCourse(course):
+    """Returns qr code uploads for an inputted course.
+    """
+    course_obj = Course.objects.filter(name=course).first()
+    if course_obj is None:
+        return []
+
+    start = _to_time(course_obj.start_time)
+    end = _to_time(course_obj.end_time)
+    if start is None or end is None:
+        return []
+
+    valid = []
+    uploads = QRCodeUpload.objects.filter(lecture__course=course_obj)
+    for upload in uploads:
+        local = timezone.localtime(upload.uploaded_at)
+        weekday = local.weekday()
+        if weekday <= 4 and course_obj.meets_on_day(weekday) and start <= local.time() <= end:
+            valid.append(upload)
+    return valid
